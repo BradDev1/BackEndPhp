@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Todo;
+use App\Form\CheckboxType as FormCheckboxType;
 use App\Form\TodoType;
 use App\Repository\TodoRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -16,14 +17,44 @@ use Symfony\Component\Routing\Annotation\Route;
 class TodoController extends AbstractController
 {
     /**
-     * @Route("/", name="app_todo_index", methods={"GET"})
+     * @Route("/", name="app_todo_index", methods={"GET","POST"})
      */
-    public function index(TodoRepository $todoRepository): Response
+    public function index(TodoRepository $todoRepository, Request $request): Response
     {
-        return $this->render('todo/index.html.twig', [
-            'todos' => $todoRepository->findAll(),
-        ]);
+        $form = $this->createForm(FormCheckboxType::class);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $isdone = $form->get('status')->getData();
+
+            $criteriaCheckbox = [];
+            if ($isdone) {
+                $criteriaCheckbox = ["status" => $isdone];
+            }
+
+            return $this->render('todo/index.html.twig', [
+                'todos' => $todoRepository->findBy($criteriaCheckbox, []),
+                'form' => $form->createView(),
+            ]);
+        }
+
+        $order = $request->query->get('order') == 'ASC' ? 'DESC' : 'ASC';
+        $orderBy = $request->query->get('orderby');
+        if (isset($order) && isset($orderBy)) {
+            $criteria = [$orderBy => $order];
+            return $this->render('todo/index.html.twig', [
+                'todos' => $todoRepository->findBy([], $criteria),
+                'order' => $order,
+                'form' => $form->createView(),
+            ]);
+        } else {
+            return $this->render('todo/index.html.twig', [
+                'todos' => $todoRepository->findAll(),
+                'form' => $form->createView(),
+            ]);
+        }
     }
+
 
     /**
      * @Route("/new", name="app_todo_new", methods={"GET", "POST"})
@@ -81,7 +112,7 @@ class TodoController extends AbstractController
      */
     public function delete(Request $request, Todo $todo, TodoRepository $todoRepository): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$todo->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $todo->getId(), $request->request->get('_token'))) {
             $todoRepository->remove($todo, true);
         }
 

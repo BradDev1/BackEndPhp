@@ -23,17 +23,7 @@ class PostController extends AbstractController
     {
         $order = $request->query->get('order');
         $orderby = $request->query->get('orderby');
-
-        if (isset($order) && isset($orderby)) {
-            if ($order === 'asc') {
-                $order = 'desc';
-            } else {
-                $order = 'asc';
-            }
-        } else {
-            $order = 'asc';
-        }
-
+        
         $criteria = [$orderby => $order];
         $posts = $postRepository->findBy([], $criteria);
 
