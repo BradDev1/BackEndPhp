@@ -3,6 +3,7 @@
 namespace App\DataFixtures;
 
 use App\Entity\Todo;
+use App\Entity\Post;
 
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
@@ -16,9 +17,10 @@ class AppFixtures extends Fixture
         $faker = Faker\Factory::create('fr_FR');
         $todo= Array();
            for ($i = 0; $i < 50; $i++) {
-               $todo[$i] = new Todo();
-               $todo[$i]->setName($faker->name);
-               $todo[$i]->setDescription($faker->text);
+               $todo[$i] = new Post();
+               $todo[$i]->setTitle($faker->name);
+               $todo[$i]->setContent($faker->text);
+               $todo[$i]->setDate($faker->Datetime);
 
                $manager->persist($todo[$i]);
            }

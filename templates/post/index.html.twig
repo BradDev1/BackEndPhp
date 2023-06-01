@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Post index{% endblock %}
+
+{% block body %}
+<h1>Post index</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>{% if orderby == 'id' and order == 'asc' %}
+                <a href="{{ path('app_post_index', {'orderby': orderby, 'order': 'asc'}) }}">ID ▼</a>
+                {% elseif orderby == 'id' and order == 'desc' %}
+                <a href="{{ path('app_post_index', {'orderby': orderby, 'order': 'asc'}) }}">ID ▲</a>
+                {% else %}
+                <a href="{{ path('app_post_index', {'orderby': 'id', 'order': 'asc'}) }}">ID</a>
+                {% endif %}
+            </th>
+            <th><a href="{{ path('app_post_index')}}?orderby=title">Title</a></th>
+            <th><a>Content</a></th>
+            <th><a>Date</a></th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for post in posts %}
+        <tr>
+            <td>{{ post.id }}</td>
+            <td>{{ post.title }}</td>
+            <td>{{ post.content }}</td>
+            <td>{{ post.date ? post.date|date('Y-m-d') : '' }}</td>
+            <td>
+                <a href="{{ path('app_post_show', {'id': post.id}) }}">show</a>
+                <a href="{{ path('app_post_edit', {'id': post.id}) }}">edit</a>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="5">no records found</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{{ path('app_post_new') }}">Create new</a>
+{% endblock %}
