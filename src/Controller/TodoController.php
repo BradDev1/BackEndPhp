@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Todo;
 use App\Form\CheckboxType as FormCheckboxType;
+use App\Form\SearchTodoType;
 use App\Form\TodoType;
 use App\Repository\TodoRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -24,6 +25,9 @@ class TodoController extends AbstractController
         $form = $this->createForm(FormCheckboxType::class);
         $form->handleRequest($request);
 
+        $formSearch = $this->createForm(SearchTodoType::class);
+        $formSearch->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
             $isdone = $form->get('status')->getData();
 
@@ -35,6 +39,22 @@ class TodoController extends AbstractController
             return $this->render('todo/index.html.twig', [
                 'todos' => $todoRepository->findBy($criteriaCheckbox, []),
                 'form' => $form->createView(),
+                'formSearch' => $formSearch->createView()
+            ]);
+        }
+
+        if ($formSearch->isSubmitted() && $formSearch->isValid()) {
+            $search = $formSearch->get('search')->getData();
+
+            $critereSearch = [];
+            if(isset($search)){
+                $search = $todoRepository->search($search);
+            }
+
+            return $this->render('todo/index.html.twig', [
+                'todos' => $search,
+                'form' => $form->createView(),
+                'formSearch' => $formSearch->createView()
             ]);
         }
 
@@ -46,11 +66,13 @@ class TodoController extends AbstractController
                 'todos' => $todoRepository->findBy([], $criteria),
                 'order' => $order,
                 'form' => $form->createView(),
+                'formSearch' => $formSearch->createView()
             ]);
         } else {
             return $this->render('todo/index.html.twig', [
                 'todos' => $todoRepository->findAll(),
                 'form' => $form->createView(),
+                'formSearch' => $formSearch->createView()
             ]);
         }
     }
